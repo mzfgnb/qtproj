@@ -1,2 +1,0 @@
-# qtproj
-qt proj
