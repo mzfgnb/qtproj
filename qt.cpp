@@ -1,3 +1,4 @@
+#include "labrecordsapp.h"
 #include <QApplication>
 #include <QMainWindow>
 #include <QTableWidget>
