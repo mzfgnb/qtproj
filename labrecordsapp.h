@@ -1,23 +1,25 @@
-// #ifndef LABRECORDSAPP_H
-// #define LABRECORDSAPP_H
+#ifndef LABRECORDSAPP_H
+#define LABRECORDSAPP_H
 
-// #include <QMainWindow>
-// #include <QTableWidget>
-// #include <QTableWidgetItem>
+#include <QMainWindow>
+#include <QTableWidget>
+#include <QTableWidgetItem>
 
-// class LabRecordsApp : public QMainWindow {
-//     Q_OBJECT
-// public:
-//     explicit LabRecordsApp(QWidget *parent = nullptr);
-// private slots:
-//     void addRecord();
-//     void editRecord();
-//     void deleteRecord();
-//     void saveToFile();
-//     void loadFromFile();
+class LabRecordsApp : public QMainWindow {
+    Q_OBJECT
 
-// private:
-//     QTableWidget *tableWidget;
-// };
+public:
+    explicit LabRecordsApp(QWidget *parent = nullptr);
 
-// #endif
+private slots:
+    void addRecord();
+    void editRecord();
+    void deleteRecord();
+    void saveToFile();
+    void loadFromFile();
+
+private:
+    QTableWidget *tableWidget;
+};
+
+#endif

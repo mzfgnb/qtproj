@@ -1,7 +1,6 @@
-QT += core gui widgets
+QT += widgets
 
-CONFIG += c++11
-
-SOURCES += main.cpp
+SOURCES += main.cpp \
+           labrecordsapp.cpp
 
 HEADERS += labrecordsapp.h
