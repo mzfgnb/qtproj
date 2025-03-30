@@ -7,6 +7,7 @@
 #include <QTextStream>
 #include <QInputDialog>
 #include <QMessageBox>
+#include <QLineEdit>
 
 class LabRecordsApp : public QMainWindow {
     Q_OBJECT
@@ -45,7 +46,13 @@ private slots:
         int row = tableWidget->rowCount();
         tableWidget->insertRow(row);
         for (int col = 0; col < 7; ++col) {
-            tableWidget->setItem(row, col, new QTableWidgetItem(QInputDialog::getText(this, "Enter Data", "Enter value:")));
+            bool ok;
+            QString value = QInputDialog::getText(this, "Enter Data", "Enter value:", QLineEdit::Normal, "", &ok);
+            if (ok && !value.isEmpty()) {
+                tableWidget->setItem(row, col, new QTableWidgetItem(value));
+            } else {
+                tableWidget->setItem(row, col, new QTableWidgetItem(""));
+            }
         }
     }
     
@@ -53,13 +60,22 @@ private slots:
         int row = tableWidget->currentRow();
         if (row < 0) return;
         for (int col = 0; col < 7; ++col) {
-            tableWidget->item(row, col)->setText(QInputDialog::getText(this, "Edit Data", "Enter new value:", QLineEdit::Normal, tableWidget->item(row, col)->text()));
+            QTableWidgetItem* item = tableWidget->item(row, col);
+            if (item) {
+                bool ok;
+                QString value = QInputDialog::getText(this, "Edit Data", "Enter new value:", QLineEdit::Normal, item->text(), &ok);
+                if (ok && !value.isEmpty()) {
+                    item->setText(value);
+                }
+            }
         }
     }
     
     void deleteRecord() {
         int row = tableWidget->currentRow();
-        if (row >= 0) tableWidget->removeRow(row);
+        if (row >= 0) {
+            tableWidget->removeRow(row);
+        }
     }
     
     void saveToFile() {
@@ -68,10 +84,17 @@ private slots:
             QTextStream out(&file);
             for (int row = 0; row < tableWidget->rowCount(); ++row) {
                 for (int col = 0; col < 7; ++col) {
-                    out << tableWidget->item(row, col)->text() << (col < 6 ? "," : "\n");
+                    QTableWidgetItem* item = tableWidget->item(row, col);
+                    if (item) {
+                        out << item->text() << (col < 6 ? "," : "\n");
+                    } else {
+                        out << "" << (col < 6 ? "," : "\n");
+                    }
                 }
             }
             file.close();
+        } else {
+            QMessageBox::warning(this, "Error", "Failed to save data to file.");
         }
     }
     
@@ -91,6 +114,8 @@ private slots:
                 }
             }
             file.close();
+        } else {
+            QMessageBox::warning(this, "Error", "Failed to load data from file.");
         }
     }
 
@@ -104,3 +129,4 @@ int main(int argc, char *argv[]) {
     window.show();
     return app.exec();
 }
+
