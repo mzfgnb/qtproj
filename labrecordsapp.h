@@ -23,7 +23,6 @@ private slots:
     void zaprosPoCourseWithGoodMark();
     void zaprosLabNotDoneTwoMonths();
     void zaprosLongestLabToDo();
-    void filterRecords();
 
 private:
     QTableWidget *tableWidget;
