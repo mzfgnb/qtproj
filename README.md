@@ -23,7 +23,4 @@
     ./a.out
     ```
 
-You also may find an issue that doesn't allow your to run with the `Permission denied`
-In this case run `chmod 777 a.out`
-
-  
+You also may find an issue that doesn't allow you to run file with the `Permission denied` error, run `chmod 777 a.out`
