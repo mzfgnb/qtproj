@@ -17,9 +17,17 @@ private slots:
     void deleteRecord();
     void saveToFile();
     void loadFromFile();
+    void zaprosLabPoSurname();
+    void zaprosLabPoGroup();
+    void zaprosLabMoreTwoPerDay();
+    void zaprosPoCourseWithGoodMark();
+    void zaprosLabNotDoneTwoMonths();
+    void zaprosLongestLabToDo();
+    void filterRecords();
 
 private:
     QTableWidget *tableWidget;
+    QLineEdit *filterLineEdit;
 };
 
 #endif
