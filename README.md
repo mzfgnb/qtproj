@@ -1,5 +1,5 @@
 
-# To compile project run
+# To compile project and run
 
 # For Qt6:
 
@@ -20,3 +20,5 @@
     make
     g++ main.o labrecordsapp.o moc_labrecordsapp.o -lQt5Widgets -lQt5Gui -lQt5Core
     ```
+
+You also may find an issue that doesn't allow you to run file with the `Permission denied` error, run `chmod 777 a.out`
