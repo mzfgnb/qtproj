@@ -6,6 +6,7 @@
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QLineEdit>
+#include <QDate>
 
 LabRecordsApp::LabRecordsApp(QWidget *parent) : QMainWindow(parent) {
     auto *centralWidget = new QWidget(this);
@@ -13,11 +14,10 @@ LabRecordsApp::LabRecordsApp(QWidget *parent) : QMainWindow(parent) {
 
     filterLineEdit = new QLineEdit(this);
     filterLineEdit->setPlaceholderText("Введите текст для фильтрации...");
-    layout->addWidget(filterLineEdit);
+
 
     tableWidget = new QTableWidget(0, 7, this);
-    tableWidget->setHorizontalHeaderLabels({"Студент", "Номер группы", "Номер курса", "Лаб. работа", "Дата сдачи", "Оценка", "Срок сдачи"});
-    tableWidget->setSortingEnabled(true);
+    tableWidget->setHorizontalHeaderLabels({"Студент", "Номер группы", "Номер курса", "Лаб. работа", "Срок сдачи", "Оценка", "Дата выдачи"});
     layout->addWidget(tableWidget);
 
     QPushButton *addButton = new QPushButton("Добавить запись", this);
@@ -55,26 +55,10 @@ LabRecordsApp::LabRecordsApp(QWidget *parent) : QMainWindow(parent) {
     connect(zaprosPoCourseWithGoodMarkButton, &QPushButton::clicked, this, &LabRecordsApp::zaprosPoCourseWithGoodMark);
     connect(zaprosLabNotDoneTwoMonthsButton, &QPushButton::clicked, this, &LabRecordsApp::zaprosLabNotDoneTwoMonths);
     connect(zaprosLongestLabToDoButton, &QPushButton::clicked, this, &LabRecordsApp::zaprosLongestLabToDo);
-    connect(filterLineEdit, &QLineEdit::textChanged, this, &LabRecordsApp::filterRecords);
 
     setCentralWidget(centralWidget);
 }
 
-void LabRecordsApp::filterRecords() {
-    QString filterText = filterLineEdit->text();
-
-    for (int row = 0; row < tableWidget->rowCount(); ++row) {
-        bool match = false;
-        for (int col = 0; col < tableWidget->columnCount(); ++col) {
-            QTableWidgetItem* item = tableWidget->item(row, col);
-            if (item && item->text().contains(filterText, Qt::CaseInsensitive)) {
-                match = true;
-                break;
-            }
-        }
-        tableWidget->setRowHidden(row, !match);
-    }
-}
 
 void LabRecordsApp::addRecord() {
     int row = tableWidget->rowCount();
@@ -154,25 +138,136 @@ void LabRecordsApp::loadFromFile() {
 }
 
 void LabRecordsApp::zaprosLabPoSurname() {
-    // Реализация запроса по фамилии
+    bool ok;
+    QString surname = QInputDialog::getText(this, "Поиск по фамилии",
+                                            "Введите фамилию студента:",
+                                            QLineEdit::Normal, "", &ok);
+    if (!ok || surname.isEmpty()) return;
+
+    // Сначала показываем все строки
+    for (int i = 0; i < tableWidget->rowCount(); ++i) {
+        tableWidget->showRow(i);
+    }
+
+    // Затем скрываем несоответствующие
+    for (int row = 0; row < tableWidget->rowCount(); ++row) {
+        QTableWidgetItem* item = tableWidget->item(row, 0); // Колонка "Студент"
+        if (!item || !item->text().contains(surname, Qt::CaseInsensitive)) {
+            tableWidget->hideRow(row);
+        }
+    }
 }
 
 void LabRecordsApp::zaprosLabPoGroup() {
-    // Реализация запроса по группе
+    bool ok;
+    QString group = QInputDialog::getText(this, "Поиск по группе",
+                                          "Введите номер группы:",
+                                          QLineEdit::Normal, "", &ok);
+    if (!ok || group.isEmpty()) return;
+
+    for (int i = 0; i < tableWidget->rowCount(); ++i) {
+        tableWidget->showRow(i);
+    }
+
+    for (int row = 0; row < tableWidget->rowCount(); ++row) {
+        QTableWidgetItem* item = tableWidget->item(row, 1); // Колонка "Номер группы"
+        if (!item || item->text() != group) {
+            tableWidget->hideRow(row);
+        }
+    }
 }
 
 void LabRecordsApp::zaprosLabMoreTwoPerDay() {
-    // Реализация запроса по >2 лаб в день
+    QMap<QString, QMap<QString, int>> countByStudentAndDate; // студент -> дата -> количество
+
+    // Подсчет количества лаб по дням для каждого студента
+    for (int row = 0; row < tableWidget->rowCount(); ++row) {
+        QString student = tableWidget->item(row, 0)->text();
+        QString date = tableWidget->item(row, 4)->text(); // Колонка "Дата сдачи"
+
+        countByStudentAndDate[student][date]++;
+    }
+
+    // Показываем только те строки, где >2 лаб в день
+    for (int row = 0; row < tableWidget->rowCount(); ++row) {
+        QString student = tableWidget->item(row, 0)->text();
+        QString date = tableWidget->item(row, 4)->text();
+
+        tableWidget->setRowHidden(row, countByStudentAndDate[student][date] <= 2);
+    }
 }
 
 void LabRecordsApp::zaprosPoCourseWithGoodMark() {
-    // Реализация запроса по хорошим оценкам
+    bool ok;
+    int course = QInputDialog::getInt(this, "Хорошие оценки по курсу",
+                                      "Введите номер курса:",
+                                      1, 1, 6, 1, &ok);
+    if (!ok) return;
+
+    for (int row = 0; row < tableWidget->rowCount(); ++row) {
+        QString courseStr = tableWidget->item(row, 2)->text(); // Колонка "Номер курса"
+        QString markStr = tableWidget->item(row, 5)->text();   // Колонка "Оценка"
+
+        bool isInt;
+        int mark = markStr.toInt(&isInt);
+
+        bool show = (courseStr == QString::number(course)) && isInt && mark >= 4;
+        tableWidget->setRowHidden(row, !show);
+    }
 }
 
 void LabRecordsApp::zaprosLabNotDoneTwoMonths() {
-    // Реализация запроса по просрочке в 2 месяца
+    QDate currentDate = QDate::currentDate();
+
+    for (int row = 0; row < tableWidget->rowCount(); ++row) {
+        QString deadlineStr = tableWidget->item(row, 6)->text(); // Колонка "Срок сдачи"
+        QString submitDateStr = tableWidget->item(row, 4)->text(); // Колонка "Дата сдачи"
+
+        QDate deadline = QDate::fromString(deadlineStr, "dd.MM.yyyy");
+        QDate submitDate = QDate::fromString(submitDateStr, "dd.MM.yyyy");
+
+        if (!deadline.isValid() || !submitDate.isValid()) {
+            tableWidget->setRowHidden(row, true);
+            continue;
+        }
+
+        // Если работа сдана после дедлайна + 2 месяца
+        bool isOverdue = (submitDate > deadline.addMonths(2));
+        tableWidget->setRowHidden(row, !isOverdue);
+    }
 }
 
 void LabRecordsApp::zaprosLongestLabToDo() {
-    // Реализация запроса по самому долгому выполнению
+    int maxDays = -1;
+    QVector<int> longestRows;
+
+    // Находим максимальное время выполнения
+    for (int row = 0; row < tableWidget->rowCount(); ++row) {
+        QString issueDateStr = tableWidget->item(row, 6)->text(); // Колонка "Срок сдачи"
+        QString submitDateStr = tableWidget->item(row, 4)->text(); // Колонка "Дата сдачи"
+
+        QDate issueDate = QDate::fromString(issueDateStr, "dd.MM.yyyy");
+        QDate submitDate = QDate::fromString(submitDateStr, "dd.MM.yyyy");
+
+        if (!issueDate.isValid() || !submitDate.isValid()) continue;
+
+        int days = issueDate.daysTo(submitDate);
+        if (days > maxDays) {
+            maxDays = days;
+            longestRows.clear();
+            longestRows.append(row);
+        } else if (days == maxDays) {
+            longestRows.append(row);
+        }
+    }
+
+    // Показываем только самые долгие
+    for (int row = 0; row < tableWidget->rowCount(); ++row) {
+        tableWidget->setRowHidden(row, !longestRows.contains(row));
+    }
+
+    if (maxDays >= 0) {
+        QMessageBox::information(this, "Результат",
+                                 QString("Максимальное время выполнения: %1 дней").arg(maxDays));
+    }
 }
