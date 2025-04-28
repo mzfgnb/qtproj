@@ -1,9 +1,9 @@
 
 # To compile project and run
 
-# For Qt6:
+### For Qt6:
 
-  # On Arch/Manjaro
+  **On Arch/Manjaro**
 
     ```
     qmake6
@@ -12,9 +12,9 @@
     ./a.out
     ```
 
-# For Qt5:
+### For Qt5:
 
-  # On Arch/Manjaro
+  **On Arch/Manjaro**
 
     ```
     qmake5
