@@ -1,5 +1,5 @@
 #include "labrecordsapp.h"
-#include "umldiagramwidget.h"
+#include "umldiagramwindow.h"
 #include <QMenu>
 #include <QMenuBar>
 #include <QAction>
@@ -45,9 +45,9 @@ LabRecordsApp::LabRecordsApp(QWidget *parent) : QMainWindow(parent) {
     QMenu *queriesMenu = new QMenu(this);
     
     queriesMenu->addAction("По фамилии", this, &LabRecordsApp::zaprosLabPoSurname);
-    queriesMenu->addAction("По группе", this, &LabRecordsApp::zaprosPoGroup);
+    queriesMenu->addAction("По группе", this, &LabRecordsApp::zaprosLabPoGroup);
     queriesMenu->addAction(">2 лаб в день", this, &LabRecordsApp::zaprosLabMoreTwoPerDay);
-    queriesMenu->addAction("Хорошие оценки", this, &LabRecordsApp::zaprosPoCouirseWithGoodMark);
+    queriesMenu->addAction("Хорошие оценки", this, &LabRecordsApp::zaprosPoCourseWithGoodMark);
     queriesMenu->addAction("Просрочка >2 месяцев", this, &LabRecordsApp::zaprosLabNotDoneTwoMonths);
     queriesMenu->addAction("Самое долгое выполнение", this, &LabRecordsApp::zaprosLongestLabToDo);
     
@@ -75,7 +75,7 @@ LabRecordsApp::LabRecordsApp(QWidget *parent) : QMainWindow(parent) {
     buttonsLayout->addWidget(loadButton);
     buttonsLayout->addWidget(resetButton);
     buttonsLayout->addWidget(queriesMenuButton);
-    buttonLayout->addWidget(showUmlButton);
+    buttonsLayout->addWidget(showUmlButton);
     buttonsLayout->addStretch(); // Добавляем растягивающийся элемент внизу
 
 
@@ -89,7 +89,7 @@ LabRecordsApp::LabRecordsApp(QWidget *parent) : QMainWindow(parent) {
     // Подключаем сигналы кнопок
     connect(addButton, &QPushButton::clicked, this, &LabRecordsApp::addRecord);
     connect(editButton, &QPushButton::clicked, this, &LabRecordsApp::editRecord);
-    connect(searchButton, &QPushbutton::clicked, this, &LabRecordsApp::searchRecord);
+    connect(searchButton, &QPushButton::clicked, this, &LabRecordsApp::searchRecord);
     connect(deleteButton, &QPushButton::clicked, this, &LabRecordsApp::deleteRecord);
     connect(saveButton, &QPushButton::clicked, this, &LabRecordsApp::saveToFile);
     connect(loadButton, &QPushButton::clicked, this, &LabRecordsApp::loadFromFile);
@@ -201,9 +201,9 @@ void LabRecordsApp::resetFilters() {
     }
 }
 
-void LabRecordsApp::showULMDiagram() {
+void LabRecordsApp::showUMLDiagram() {
     UmlDiagramWindow *umlWindow = new UmlDiagramWindow(this);
-    umlWindow->exec();
+    umlWindow->show();
 }
 
 void LabRecordsApp::zaprosLabPoSurname() {
