@@ -40,12 +40,12 @@ LabRecordsApp::LabRecordsApp(QWidget *parent) : QMainWindow(parent) {
     QPushButton *queriesMenuButton = new QPushButton("Запросы");
     QMenu *queriesMenu = new QMenu(this);
     
-    menu->addWidget("По фамилии", this, *LabRecordsApp::zaprosLabPoSurname);
-    menu->addWidget("По группе", this, *LabRecordsApp::zaprosPoGroup);
-    menu->addWidget(">2 лаб в день", this, *LabRecordsApp::zaprosLabMoreTwoPerDay);
-    menu->addWidget("Хорошие оценки", this, *LabRecordsApp::zaprosPoCouirseWithGoodMark);
-    menu->addWidget("Просрочка >2 месяцев", this, *LabRecordsApp::zaprosLabNotDoneTwoMonths);
-    menu->addWidget("Самое долгое выполнение", this, *LabRecordsApp::zaprosLongestLabToDo);
+    queriesMenu->addWidget("По фамилии", this, *LabRecordsApp::zaprosLabPoSurname);
+    queriesMenu->addWidget("По группе", this, *LabRecordsApp::zaprosPoGroup);
+    queriesMenu->addWidget(">2 лаб в день", this, *LabRecordsApp::zaprosLabMoreTwoPerDay);
+    queriesMenu->addWidget("Хорошие оценки", this, *LabRecordsApp::zaprosPoCouirseWithGoodMark);
+    queriesMenu->addWidget("Просрочка >2 месяцев", this, *LabRecordsApp::zaprosLabNotDoneTwoMonths);
+    queriesMenu->addWidget("Самое долгое выполнение", this, *LabRecordsApp::zaprosLongestLabToDo);
     
     queriesMenuButton->setMenu(menu);
 
