@@ -2,8 +2,8 @@ QT += widgets
 
 SOURCES += main.cpp \
            labrecordsapp.cpp \
-           umlgiargramwindow.cpp
+           umldiagramwindow.cpp
 
 HEADERS += \
            labrecordsapp.h \
-           umlgiargramwindow.h
+           umldiagramwindow.h
