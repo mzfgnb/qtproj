@@ -8,7 +8,7 @@
     
     qmake6 
     make 
-    g++ main.o labrecordsapp.o moc_labrecordsapp.o -lQt6Widgets -lQt6Gui -lQt6Core 
+    g++ main.o labrecordsapp.o moc_labrecordsapp.o moc_umldiagramwindow.o umldiagramwindow.o -lQt6Widgets -lQt6Gui -lQt6Core 
     ./a.out  
     
 
@@ -19,7 +19,7 @@
     
     qmake5 
     make 
-    g++ main.o labrecordsapp.o moc_labrecordsapp.o -lQt5Widgets -lQt5Gui -lQt5Core 
+    g++ main.o labrecordsapp.o moc_labrecordsapp.o moc_umldiagramwindow.o umldiagramwindow.o -lQt5Widgets -lQt5Gui -lQt5Core 
     ./a.out   
     
 
