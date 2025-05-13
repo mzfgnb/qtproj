@@ -31,43 +31,66 @@ LabRecordsApp::LabRecordsApp(QWidget *parent) : QMainWindow(parent) {
     // Создаем кнопки
     QPushButton *addButton = new QPushButton("Добавить запись");
     QPushButton *editButton = new QPushButton("Редактировать запись");
+    QPushButton *searchButton = new QPushButton("Поиск");
     QPushButton *deleteButton = new QPushButton("Удалить запись");
     QPushButton *saveButton = new QPushButton("Сохранить в файл");
     QPushButton *loadButton = new QPushButton("Загрузить из файла");
-    QPushButton *zaprosLabPoSurnameButton = new QPushButton("Запрос по фамилии");
-    QPushButton *zaprosLabPoGroupButton = new QPushButton("Запрос по группе");
-    QPushButton *zaprosLabMoreTwoPerDayButton = new QPushButton("Запрос по >2 лаб/день");
-    QPushButton *zaprosPoCourseWithGoodMarkButton = new QPushButton("Запрос по хорошим оценкам");
-    QPushButton *zaprosLabNotDoneTwoMonthsButton = new QPushButton("Запрос по просрочке в 2 месяца");
-    QPushButton *zaprosLongestLabToDoButton = new QPushButton("Запрос по самому долгому выполнению");
+    QPushButton *resetButton = new QPushButton("Сбросить фильтр");
+
+    QPushButton *queriesMenuButton = new QPushButton("Запросы");
+    QMenu *queriesMenu = new QMenu(this);
+    
+    menu->addWidget("По фамилии", this, *LabRecordsApp::zaprosLabPoSurname);
+    menu->addWidget("По группе", this, *LabRecordsApp::zaprosPoGroup);
+    menu->addWidget(">2 лаб в день", this, *LabRecordsApp::zaprosLabMoreTwoPerDay);
+    menu->addWidget("Хорошие оценки", this, *LabRecordsApp::zaprosPoCouirseWithGoodMark);
+    menu->addWidget("Просрочка >2 месяцев", this, *LabRecordsApp::zaprosLabNotDoneTwoMonths);
+    menu->addWidget("Самое долгое выполнение", this, *LabRecordsApp::zaprosLongestLabToDo);
+    
+    queriesMenuButton->setMenu(menu);
+
+    // QPushButton *zaprosLabPoSurnameButton = new QPushButton("Запрос по фамилии");
+    // QPushButton *zaprosLabPoGroupButton = new QPushButton("Запрос по группе");
+    // QPushButton *zaprosLabMoreTwoPerDayButton = new QPushButton("Запрос по >2 лаб/день");
+    // QPushButton *zaprosPoCourseWithGoodMarkButton = new QPushButton("Запрос по хорошим оценкам");
+    // QPushButton *zaprosLabNotDoneTwoMonthsButton = new QPushButton("Запрос по просрочке в 2 месяца");
+    // QPushButton *zaprosLongestLabToDoButton = new QPushButton("Запрос по самому долгому выполнению");
 
     // Устанавливаем фиксированный размер кнопок
     const QSize buttonSize(300, 40);
     addButton->setFixedSize(buttonSize);
     editButton->setFixedSize(buttonSize);
+    searchButton->setFixedSize(buttonSize);
     deleteButton->setFixedSize(buttonSize);
     saveButton->setFixedSize(buttonSize);
     loadButton->setFixedSize(buttonSize);
-    zaprosLabPoSurnameButton->setFixedSize(buttonSize);
-    zaprosLabPoGroupButton->setFixedSize(buttonSize);
-    zaprosLabMoreTwoPerDayButton->setFixedSize(buttonSize);
-    zaprosPoCourseWithGoodMarkButton->setFixedSize(buttonSize);
-    zaprosLabNotDoneTwoMonthsButton->setFixedSize(buttonSize);
-    zaprosLongestLabToDoButton->setFixedSize(buttonSize);
+    resetButton->setFixedSize(buttonSize);
+    queriesMenuButton->setFixedSize(buttonSize);
+    // zaprosLabPoSurnameButton->setFixedSize(buttonSize);
+    // zaprosLabPoGroupButton->setFixedSize(buttonSize);
+    // zaprosLabMoreTwoPerDayButton->setFixedSize(buttonSize);
+    // zaprosPoCourseWithGoodMarkButton->setFixedSize(buttonSize);
+    // zaprosLabNotDoneTwoMonthsButton->setFixedSize(buttonSize);
+    // zaprosLongestLabToDoButton->setFixedSize(buttonSize);
+
 
     // Добавляем кнопки в правый layout
     buttonsLayout->addWidget(addButton);
     buttonsLayout->addWidget(editButton);
+    buttonsLayout->addwidget(searchButton);
     buttonsLayout->addWidget(deleteButton);
     buttonsLayout->addWidget(saveButton);
     buttonsLayout->addWidget(loadButton);
-    buttonsLayout->addWidget(zaprosLabPoSurnameButton);
-    buttonsLayout->addWidget(zaprosLabPoGroupButton);
-    buttonsLayout->addWidget(zaprosLabMoreTwoPerDayButton);
-    buttonsLayout->addWidget(zaprosPoCourseWithGoodMarkButton);
-    buttonsLayout->addWidget(zaprosLabNotDoneTwoMonthsButton);
-    buttonsLayout->addWidget(zaprosLongestLabToDoButton);
+    buttonsLayout->addWidget(resetButton);
+    buttonsLayout->addWidget(queriesMenuButton);
+    // buttonsLayout->addWidget(zaprosLabPoSurnameButton);
+    // buttonsLayout->addWidget(zaprosLabPoGroupButton);
+    // buttonsLayout->addWidget(zaprosLabMoreTwoPerDayButton);
+    // buttonsLayout->addWidget(zaprosPoCourseWithGoodMarkButton);
+    // buttonsLayout->addWidget(zaprosLabNotDoneTwoMonthsButton);
+    // buttonsLayout->addWidget(zaprosLongestLabToDoButton);
     buttonsLayout->addStretch(); // Добавляем растягивающийся элемент внизу
+
 
     // Добавляем таблицу и кнопки в главный layout
     mainLayout->addWidget(tableWidget, 1); // Таблица будет растягиваться
@@ -79,9 +102,11 @@ LabRecordsApp::LabRecordsApp(QWidget *parent) : QMainWindow(parent) {
     // Подключаем сигналы кнопок
     connect(addButton, &QPushButton::clicked, this, &LabRecordsApp::addRecord);
     connect(editButton, &QPushButton::clicked, this, &LabRecordsApp::editRecord);
+    connect(searchButton, &QPushbutton::clicked, this, *LabRecordsApp::searchRecord);
     connect(deleteButton, &QPushButton::clicked, this, &LabRecordsApp::deleteRecord);
     connect(saveButton, &QPushButton::clicked, this, &LabRecordsApp::saveToFile);
     connect(loadButton, &QPushButton::clicked, this, &LabRecordsApp::loadFromFile);
+    connect(resetButton, &QPushButton::clicked, this, *LabRecordsApp::resetFilters);
     connect(zaprosLabPoSurnameButton, &QPushButton::clicked, this, &LabRecordsApp::zaprosLabPoSurname);
     connect(zaprosLabPoGroupButton, &QPushButton::clicked, this, &LabRecordsApp::zaprosLabPoGroup);
     connect(zaprosLabMoreTwoPerDayButton, &QPushButton::clicked, this, &LabRecordsApp::zaprosLabMoreTwoPerDay);
@@ -118,6 +143,25 @@ void LabRecordsApp::editRecord() {
                 item->setText(value);
             }
         }
+    }
+}
+
+void LabRecordsApp::searchRecord() {
+    bool ok;
+    QString query = QInputDialog::getText(this, "Поиск", "Введите текст для поиска:",
+                                          QLineEdit::Normal, "", &ok);
+    if (!ok || query.isEmpty()) return;
+
+    for (int row = 0; row < tableWidget->rowCount(); ++row) {
+        bool match = false;
+        for (int col = 0; col < tableWidget->columnCount(); ++col) {
+            QTableWidgetItem* item = tableWidget->item(row, col);
+            if (item && item->text().contains(query, Qt::CaseInsensitive)) {
+                match = true;
+                break;
+            }
+        }
+        tableWidget->setRowHidden(row, !match);
     }
 }
 
@@ -166,6 +210,12 @@ void LabRecordsApp::loadFromFile() {
         file.close();
     } else {
         QMessageBox::warning(this, "Ошибка", "Ошибка при загрузке данных из файла");
+    }
+}
+
+void LabRecordsApp::resetFilters() {
+    for (int row = 0; row < tableWidget->rowCount(); ++row) {
+        tableWidget->showRow(row);
     }
 }
 

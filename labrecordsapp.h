@@ -13,10 +13,12 @@ public:
 
 private slots:
     void addRecord();
+    void searchRecord();
     void editRecord();
     void deleteRecord();
     void saveToFile();
     void loadFromFile();
+    void resetFilters();
     void zaprosLabPoSurname();
     void zaprosLabPoGroup();
     void zaprosLabMoreTwoPerDay();
