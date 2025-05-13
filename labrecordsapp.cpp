@@ -9,41 +9,74 @@
 #include <QDate>
 
 LabRecordsApp::LabRecordsApp(QWidget *parent) : QMainWindow(parent) {
+    // Главный виджет и горизонтальный layout
     auto *centralWidget = new QWidget(this);
-    auto *layout = new QVBoxLayout(centralWidget);
+    auto *mainLayout = new QHBoxLayout(centralWidget); // Основной горизонтальный layout
 
-    filterLineEdit = new QLineEdit(this);
-    filterLineEdit->setPlaceholderText("Введите текст для фильтрации...");
-
-
+    // Создаем таблицу (будет слева)
     tableWidget = new QTableWidget(0, 7, this);
-    tableWidget->setHorizontalHeaderLabels({"Студент", "Номер группы", "Номер курса", "Лаб. работа", "Срок сдачи", "Оценка", "Дата выдачи"});
-    layout->addWidget(tableWidget);
+    tableWidget->setHorizontalHeaderLabels({"Студент", "Номер группы", "Номер курса",
+                                            "Лаб. работа", "Срок сдачи", "Оценка", "Дата выдачи"});
 
-    QPushButton *addButton = new QPushButton("Добавить запись", this);
-    QPushButton *editButton = new QPushButton("Редактировать запись", this);
-    QPushButton *deleteButton = new QPushButton("Удалить запись", this);
-    QPushButton *saveButton = new QPushButton("Сохранить в файл", this);
-    QPushButton *loadButton = new QPushButton("Загрузить из файла", this);
-    QPushButton *zaprosLabPoSurnameButton = new QPushButton("Запрос по фамилии", this);
-    QPushButton *zaprosLabPoGroupButton = new QPushButton("Запрос по группе", this);
-    QPushButton *zaprosLabMoreTwoPerDayButton = new QPushButton("Запрос по >2 лаб/день", this);
-    QPushButton *zaprosPoCourseWithGoodMarkButton = new QPushButton("Запрос по хорошим оценкам", this);
-    QPushButton *zaprosLabNotDoneTwoMonthsButton = new QPushButton("Запрос по просрочке в 2 месяца", this);
-    QPushButton *zaprosLongestLabToDoButton = new QPushButton("Запрос по самому долгому выполнению", this);
+    // Настраиваем растягивание таблицы
+    tableWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    for (int col = 0; col < tableWidget->columnCount(); ++col) {
+        tableWidget->setColumnWidth(col, 200);
+    }
 
-    layout->addWidget(addButton);
-    layout->addWidget(editButton);
-    layout->addWidget(deleteButton);
-    layout->addWidget(saveButton);
-    layout->addWidget(loadButton);
-    layout->addWidget(zaprosLabPoSurnameButton);
-    layout->addWidget(zaprosLabPoGroupButton);
-    layout->addWidget(zaprosLabMoreTwoPerDayButton);
-    layout->addWidget(zaprosPoCourseWithGoodMarkButton);
-    layout->addWidget(zaprosLabNotDoneTwoMonthsButton);
-    layout->addWidget(zaprosLongestLabToDoButton);
+    // Создаем вертикальный layout для кнопок (будет справа)
+    auto *buttonsLayout = new QVBoxLayout();
+    buttonsLayout->setAlignment(Qt::AlignTop); // Выравнивание кнопок по верху
 
+    // Создаем кнопки
+    QPushButton *addButton = new QPushButton("Добавить запись");
+    QPushButton *editButton = new QPushButton("Редактировать запись");
+    QPushButton *deleteButton = new QPushButton("Удалить запись");
+    QPushButton *saveButton = new QPushButton("Сохранить в файл");
+    QPushButton *loadButton = new QPushButton("Загрузить из файла");
+    QPushButton *zaprosLabPoSurnameButton = new QPushButton("Запрос по фамилии");
+    QPushButton *zaprosLabPoGroupButton = new QPushButton("Запрос по группе");
+    QPushButton *zaprosLabMoreTwoPerDayButton = new QPushButton("Запрос по >2 лаб/день");
+    QPushButton *zaprosPoCourseWithGoodMarkButton = new QPushButton("Запрос по хорошим оценкам");
+    QPushButton *zaprosLabNotDoneTwoMonthsButton = new QPushButton("Запрос по просрочке в 2 месяца");
+    QPushButton *zaprosLongestLabToDoButton = new QPushButton("Запрос по самому долгому выполнению");
+
+    // Устанавливаем фиксированный размер кнопок
+    const QSize buttonSize(300, 40);
+    addButton->setFixedSize(buttonSize);
+    editButton->setFixedSize(buttonSize);
+    deleteButton->setFixedSize(buttonSize);
+    saveButton->setFixedSize(buttonSize);
+    loadButton->setFixedSize(buttonSize);
+    zaprosLabPoSurnameButton->setFixedSize(buttonSize);
+    zaprosLabPoGroupButton->setFixedSize(buttonSize);
+    zaprosLabMoreTwoPerDayButton->setFixedSize(buttonSize);
+    zaprosPoCourseWithGoodMarkButton->setFixedSize(buttonSize);
+    zaprosLabNotDoneTwoMonthsButton->setFixedSize(buttonSize);
+    zaprosLongestLabToDoButton->setFixedSize(buttonSize);
+
+    // Добавляем кнопки в правый layout
+    buttonsLayout->addWidget(addButton);
+    buttonsLayout->addWidget(editButton);
+    buttonsLayout->addWidget(deleteButton);
+    buttonsLayout->addWidget(saveButton);
+    buttonsLayout->addWidget(loadButton);
+    buttonsLayout->addWidget(zaprosLabPoSurnameButton);
+    buttonsLayout->addWidget(zaprosLabPoGroupButton);
+    buttonsLayout->addWidget(zaprosLabMoreTwoPerDayButton);
+    buttonsLayout->addWidget(zaprosPoCourseWithGoodMarkButton);
+    buttonsLayout->addWidget(zaprosLabNotDoneTwoMonthsButton);
+    buttonsLayout->addWidget(zaprosLongestLabToDoButton);
+    buttonsLayout->addStretch(); // Добавляем растягивающийся элемент внизу
+
+    // Добавляем таблицу и кнопки в главный layout
+    mainLayout->addWidget(tableWidget, 1); // Таблица будет растягиваться
+    mainLayout->addLayout(buttonsLayout);  // Кнопки справа
+
+    // Устанавливаем центральный виджет
+    this->setCentralWidget(centralWidget);
+
+    // Подключаем сигналы кнопок
     connect(addButton, &QPushButton::clicked, this, &LabRecordsApp::addRecord);
     connect(editButton, &QPushButton::clicked, this, &LabRecordsApp::editRecord);
     connect(deleteButton, &QPushButton::clicked, this, &LabRecordsApp::deleteRecord);
@@ -55,9 +88,8 @@ LabRecordsApp::LabRecordsApp(QWidget *parent) : QMainWindow(parent) {
     connect(zaprosPoCourseWithGoodMarkButton, &QPushButton::clicked, this, &LabRecordsApp::zaprosPoCourseWithGoodMark);
     connect(zaprosLabNotDoneTwoMonthsButton, &QPushButton::clicked, this, &LabRecordsApp::zaprosLabNotDoneTwoMonths);
     connect(zaprosLongestLabToDoButton, &QPushButton::clicked, this, &LabRecordsApp::zaprosLongestLabToDo);
-
-    setCentralWidget(centralWidget);
 }
+
 
 
 void LabRecordsApp::addRecord() {
