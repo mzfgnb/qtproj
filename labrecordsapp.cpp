@@ -1,4 +1,8 @@
 #include "labrecordsapp.h"
+#include "umldiagramwidget.h"
+#include <QMenu>
+#include <QMenuBar>
+#include <QAction>
 #include <QVBoxLayout>
 #include <QPushButton>
 #include <QFile>
@@ -35,26 +39,19 @@ LabRecordsApp::LabRecordsApp(QWidget *parent) : QMainWindow(parent) {
     QPushButton *deleteButton = new QPushButton("Удалить запись");
     QPushButton *saveButton = new QPushButton("Сохранить в файл");
     QPushButton *loadButton = new QPushButton("Загрузить из файла");
+    QPushButton *showUmlButton = new QPushButton("Показать UML");
     QPushButton *resetButton = new QPushButton("Сбросить фильтр");
-
     QPushButton *queriesMenuButton = new QPushButton("Запросы");
     QMenu *queriesMenu = new QMenu(this);
     
-    queriesMenu->addWidget("По фамилии", this, *LabRecordsApp::zaprosLabPoSurname);
-    queriesMenu->addWidget("По группе", this, *LabRecordsApp::zaprosPoGroup);
-    queriesMenu->addWidget(">2 лаб в день", this, *LabRecordsApp::zaprosLabMoreTwoPerDay);
-    queriesMenu->addWidget("Хорошие оценки", this, *LabRecordsApp::zaprosPoCouirseWithGoodMark);
-    queriesMenu->addWidget("Просрочка >2 месяцев", this, *LabRecordsApp::zaprosLabNotDoneTwoMonths);
-    queriesMenu->addWidget("Самое долгое выполнение", this, *LabRecordsApp::zaprosLongestLabToDo);
+    queriesMenu->addAction("По фамилии", this, &LabRecordsApp::zaprosLabPoSurname);
+    queriesMenu->addAction("По группе", this, &LabRecordsApp::zaprosPoGroup);
+    queriesMenu->addAction(">2 лаб в день", this, &LabRecordsApp::zaprosLabMoreTwoPerDay);
+    queriesMenu->addAction("Хорошие оценки", this, &LabRecordsApp::zaprosPoCouirseWithGoodMark);
+    queriesMenu->addAction("Просрочка >2 месяцев", this, &LabRecordsApp::zaprosLabNotDoneTwoMonths);
+    queriesMenu->addAction("Самое долгое выполнение", this, &LabRecordsApp::zaprosLongestLabToDo);
     
-    queriesMenuButton->setMenu(menu);
-
-    // QPushButton *zaprosLabPoSurnameButton = new QPushButton("Запрос по фамилии");
-    // QPushButton *zaprosLabPoGroupButton = new QPushButton("Запрос по группе");
-    // QPushButton *zaprosLabMoreTwoPerDayButton = new QPushButton("Запрос по >2 лаб/день");
-    // QPushButton *zaprosPoCourseWithGoodMarkButton = new QPushButton("Запрос по хорошим оценкам");
-    // QPushButton *zaprosLabNotDoneTwoMonthsButton = new QPushButton("Запрос по просрочке в 2 месяца");
-    // QPushButton *zaprosLongestLabToDoButton = new QPushButton("Запрос по самому долгому выполнению");
+    queriesMenuButton->setMenu(queriesMenu);
 
     // Устанавливаем фиксированный размер кнопок
     const QSize buttonSize(300, 40);
@@ -66,29 +63,19 @@ LabRecordsApp::LabRecordsApp(QWidget *parent) : QMainWindow(parent) {
     loadButton->setFixedSize(buttonSize);
     resetButton->setFixedSize(buttonSize);
     queriesMenuButton->setFixedSize(buttonSize);
-    // zaprosLabPoSurnameButton->setFixedSize(buttonSize);
-    // zaprosLabPoGroupButton->setFixedSize(buttonSize);
-    // zaprosLabMoreTwoPerDayButton->setFixedSize(buttonSize);
-    // zaprosPoCourseWithGoodMarkButton->setFixedSize(buttonSize);
-    // zaprosLabNotDoneTwoMonthsButton->setFixedSize(buttonSize);
-    // zaprosLongestLabToDoButton->setFixedSize(buttonSize);
+    showUmlButton->setFixedSize(buttonSize);
 
 
     // Добавляем кнопки в правый layout
     buttonsLayout->addWidget(addButton);
     buttonsLayout->addWidget(editButton);
-    buttonsLayout->addwidget(searchButton);
+    buttonsLayout->addWidget(searchButton);
     buttonsLayout->addWidget(deleteButton);
     buttonsLayout->addWidget(saveButton);
     buttonsLayout->addWidget(loadButton);
     buttonsLayout->addWidget(resetButton);
     buttonsLayout->addWidget(queriesMenuButton);
-    // buttonsLayout->addWidget(zaprosLabPoSurnameButton);
-    // buttonsLayout->addWidget(zaprosLabPoGroupButton);
-    // buttonsLayout->addWidget(zaprosLabMoreTwoPerDayButton);
-    // buttonsLayout->addWidget(zaprosPoCourseWithGoodMarkButton);
-    // buttonsLayout->addWidget(zaprosLabNotDoneTwoMonthsButton);
-    // buttonsLayout->addWidget(zaprosLongestLabToDoButton);
+    buttonLayout->addWidget(showUmlButton);
     buttonsLayout->addStretch(); // Добавляем растягивающийся элемент внизу
 
 
@@ -102,17 +89,12 @@ LabRecordsApp::LabRecordsApp(QWidget *parent) : QMainWindow(parent) {
     // Подключаем сигналы кнопок
     connect(addButton, &QPushButton::clicked, this, &LabRecordsApp::addRecord);
     connect(editButton, &QPushButton::clicked, this, &LabRecordsApp::editRecord);
-    connect(searchButton, &QPushbutton::clicked, this, *LabRecordsApp::searchRecord);
+    connect(searchButton, &QPushbutton::clicked, this, &LabRecordsApp::searchRecord);
     connect(deleteButton, &QPushButton::clicked, this, &LabRecordsApp::deleteRecord);
     connect(saveButton, &QPushButton::clicked, this, &LabRecordsApp::saveToFile);
     connect(loadButton, &QPushButton::clicked, this, &LabRecordsApp::loadFromFile);
-    connect(resetButton, &QPushButton::clicked, this, *LabRecordsApp::resetFilters);
-    connect(zaprosLabPoSurnameButton, &QPushButton::clicked, this, &LabRecordsApp::zaprosLabPoSurname);
-    connect(zaprosLabPoGroupButton, &QPushButton::clicked, this, &LabRecordsApp::zaprosLabPoGroup);
-    connect(zaprosLabMoreTwoPerDayButton, &QPushButton::clicked, this, &LabRecordsApp::zaprosLabMoreTwoPerDay);
-    connect(zaprosPoCourseWithGoodMarkButton, &QPushButton::clicked, this, &LabRecordsApp::zaprosPoCourseWithGoodMark);
-    connect(zaprosLabNotDoneTwoMonthsButton, &QPushButton::clicked, this, &LabRecordsApp::zaprosLabNotDoneTwoMonths);
-    connect(zaprosLongestLabToDoButton, &QPushButton::clicked, this, &LabRecordsApp::zaprosLongestLabToDo);
+    connect(resetButton, &QPushButton::clicked, this, &LabRecordsApp::resetFilters);
+    connect(showUmlButton, &QPushButton::clicked, this, &LabRecordsApp::showUMLDiagram);
 }
 
 
@@ -217,6 +199,11 @@ void LabRecordsApp::resetFilters() {
     for (int row = 0; row < tableWidget->rowCount(); ++row) {
         tableWidget->showRow(row);
     }
+}
+
+void LabRecordsApp::showULMDiagram() {
+    UmlDiagramWindow *umlWindow = new UmlDiagramWindow(this);
+    umlWindow->exec();
 }
 
 void LabRecordsApp::zaprosLabPoSurname() {

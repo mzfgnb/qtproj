@@ -19,6 +19,7 @@ private slots:
     void saveToFile();
     void loadFromFile();
     void resetFilters();
+    void showUMLDiagram();
     void zaprosLabPoSurname();
     void zaprosLabPoGroup();
     void zaprosLabMoreTwoPerDay();
