@@ -1,4 +1,4 @@
-QT += widgets
+QT += widgets charts
 
 SOURCES += main.cpp \
            labrecordsapp.cpp \
