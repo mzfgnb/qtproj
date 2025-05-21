@@ -150,6 +150,19 @@ void LabRecordsApp::addRecord() {
             tableWidget->setItem(row, col, new QTableWidgetItem(""));
         }
     }
+    // Обновляем список дисциплин в выпадающем списке
+    if (courseComboBox) {
+        QSet<QString> currentItems;
+        for (int i = 1; i < courseComboBox->count(); ++i) {
+            currentItems.insert(courseComboBox->itemText(i));
+        }
+
+        QString newSubject = tableWidget->item(tableWidget->rowCount() - 1, 2)->text(); // колонка "Дисциплина"
+
+        if (!currentItems.contains(newSubject)) {
+            courseComboBox->addItem(newSubject);
+        }
+    }
 }
 
 void LabRecordsApp::editRecord() {
@@ -229,6 +242,20 @@ void LabRecordsApp::loadFromFile() {
             }
         }
         file.close();
+        // Обновляем список курсов после загрузки
+        courseComboBox->clear();
+        courseComboBox->addItem("Выберите дисциплину");
+
+        QSet<QString> uniqueSubjects;
+        for (int row = 0; row < tableWidget->rowCount(); ++row) {
+            QTableWidgetItem *item = tableWidget->item(row, 2); // колонка "Дисциплина"
+            if (item) {
+                uniqueSubjects.insert(item->text());
+            }
+        }
+        for (const QString &subject : uniqueSubjects) {
+            courseComboBox->addItem(subject);
+        }
     } else {
         QMessageBox::warning(this, "Ошибка", "Ошибка при загрузке данных из файла");
     }
