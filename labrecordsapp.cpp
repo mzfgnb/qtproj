@@ -23,7 +23,7 @@ LabRecordsApp::LabRecordsApp(QWidget *parent) : QMainWindow(parent) {
 
     // Создаем таблицу (будет слева)
     tableWidget = new QTableWidget(0, 7, this);
-    tableWidget->setHorizontalHeaderLabels({"Студент", "Номер группы", "Номер курса",
+    tableWidget->setHorizontalHeaderLabels({"Студент", "Номер группы", "Дисциплина",
                                             "Лаб. работа", "Срок сдачи", "Оценка", "Дата выдачи"});
 
     // Настраиваем растягивание таблицы
@@ -307,19 +307,18 @@ void LabRecordsApp::zaprosLabMoreTwoPerDay() {
 
 void LabRecordsApp::zaprosPoCourseWithGoodMark() {
     bool ok;
-    int course = QInputDialog::getInt(this, "Хорошие оценки по курсу",
-                                      "Введите номер курса:",
-                                      1, 1, 6, 1, &ok);
-    if (!ok) return;
+    QString subject = QInputDialog::getText(this, "Хорошие оценки по предмету",
+                                            "Введите название предмета:", QLineEdit::Normal, "", &ok);
+    if (!ok || subject.isEmpty()) return;
 
     for (int row = 0; row < tableWidget->rowCount(); ++row) {
-        QString courseStr = tableWidget->item(row, 2)->text(); // Колонка "Номер курса"
-        QString markStr = tableWidget->item(row, 5)->text();   // Колонка "Оценка"
+        QString subjectStr = tableWidget->item(row, 2)->text(); // дисциплина
+        QString markStr = tableWidget->item(row, 5)->text();     // оценка
 
         bool isInt;
         int mark = markStr.toInt(&isInt);
 
-        bool show = (courseStr == QString::number(course)) && isInt && mark >= 4;
+        bool show = (subjectStr.compare(subject, Qt::CaseInsensitive) == 0) && isInt && mark >= 4;
         tableWidget->setRowHidden(row, !show);
     }
 }
@@ -380,7 +379,7 @@ void LabRecordsApp::zaprosLongestLabToDo() {
     }
 }
 
-void LabRecordsApp::showChartsForCourse(const QString &selectedCourse) {
+void LabRecordsApp::showChartsForCourse(const QString &selectedSubject) {
     QMap<QString, int> courseCounts;
     int total = 0;
 
@@ -399,7 +398,7 @@ void LabRecordsApp::showChartsForCourse(const QString &selectedCourse) {
     }
 
     ChartWindow *chart = new ChartWindow(this);
-    chart->setData(courseData, selectedCourse);
+    chart->setData(courseData, selectedSubject);
     chart->exec();
 }
 
