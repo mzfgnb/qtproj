@@ -1,6 +1,5 @@
 #include "labrecordsapp.h"
 #include "umldiagramwindow.h"
-#include "chartwindow.h"
 #include <QMenu>
 #include <QMenuBar>
 #include <QAction>
@@ -14,6 +13,7 @@
 #include <QDate>
 #include <QComboBox>
 #include <QLabel>
+#include "chartwindow.h"
 
 LabRecordsApp::LabRecordsApp(QWidget *parent) : QMainWindow(parent) {
     

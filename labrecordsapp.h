@@ -4,6 +4,9 @@
 #include <QMainWindow>
 #include <QTableWidget>
 #include <QTableWidgetItem>
+#include <QComboBox>
+#include <QLabel>
+#include <QPushButton>
 
 class LabRecordsApp : public QMainWindow {
     Q_OBJECT
