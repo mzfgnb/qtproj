@@ -30,6 +30,9 @@ private slots:
 private:
     QTableWidget *tableWidget;
     QLineEdit *filterLineEdit;
+    QComboBox *courseComboBox;
+    QPushButton *analyzeButton;
+    void showChartsForCourse(const QString &selectedCourse);
 };
 
 #endif

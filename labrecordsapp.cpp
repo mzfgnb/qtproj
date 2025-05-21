@@ -1,5 +1,6 @@
 #include "labrecordsapp.h"
 #include "umldiagramwindow.h"
+#include "chartwindow.h"
 #include <QMenu>
 #include <QMenuBar>
 #include <QAction>
@@ -11,8 +12,11 @@
 #include <QMessageBox>
 #include <QLineEdit>
 #include <QDate>
+#include <QComboBox>
+#include <QLabel>
 
 LabRecordsApp::LabRecordsApp(QWidget *parent) : QMainWindow(parent) {
+    
     // Главный виджет и горизонтальный layout
     auto *centralWidget = new QWidget(this);
     auto *mainLayout = new QHBoxLayout(centralWidget); // Основной горизонтальный layout
@@ -52,7 +56,7 @@ LabRecordsApp::LabRecordsApp(QWidget *parent) : QMainWindow(parent) {
     queriesMenu->addAction("Самое долгое выполнение", this, &LabRecordsApp::zaprosLongestLabToDo);
     
     queriesMenuButton->setMenu(queriesMenu);
-
+    
     // Устанавливаем фиксированный размер кнопок
     const QSize buttonSize(300, 40);
     addButton->setFixedSize(buttonSize);
@@ -82,6 +86,41 @@ LabRecordsApp::LabRecordsApp(QWidget *parent) : QMainWindow(parent) {
     // Добавляем таблицу и кнопки в главный layout
     mainLayout->addWidget(tableWidget, 1); // Таблица будет растягиваться
     mainLayout->addLayout(buttonsLayout);  // Кнопки справа
+
+    // Добавим нижнюю панель анализа по курсу
+    auto *analysisLayout = new QVBoxLayout();
+
+    // Заполняем список уникальных курсов из таблицы
+    QSet<QString> courseSet;
+    for (int row = 0; row < tableWidget->rowCount(); ++row) {
+        QTableWidgetItem *item = tableWidget->item(row, 2); // Колонка "Номер курса"
+        if (item) {
+            courseSet.insert(item->text());
+        }
+    }
+
+    courseComboBox = new QComboBox(this);
+    courseComboBox->addItem("Выберите курс");
+    for (const QString &course : courseSet) {
+        courseComboBox->addItem(course);
+    }
+
+    analyzeButton = new QPushButton("Показать диаграммы", this);
+    analyzeButton->setFixedSize(buttonSize);
+
+    buttonsLayout->addWidget(new QLabel("Анализ по курсу:"));
+    buttonsLayout->addWidget(courseComboBox);
+    buttonsLayout->addWidget(analyzeButton);
+
+    // Обработчик кнопки анализа
+    connect(analyzeButton, &QPushButton::clicked, this, [this]() {
+        QString selected = courseComboBox->currentText();
+        if (selected == "Выберите курс") {
+            QMessageBox::warning(this, "Ошибка", "Пожалуйста, выберите курс.");
+            return;
+        }
+        showChartsForCourse(selected);
+    });
 
     // Устанавливаем центральный виджет
     this->setCentralWidget(centralWidget);
@@ -340,3 +379,27 @@ void LabRecordsApp::zaprosLongestLabToDo() {
                                  QString("Максимальное время выполнения: %1 дней").arg(maxDays));
     }
 }
+
+void LabRecordsApp::showChartsForCourse(const QString &selectedCourse) {
+    QMap<QString, int> courseCounts;
+    int total = 0;
+
+    for (int row = 0; row < tableWidget->rowCount(); ++row) {
+        QTableWidgetItem *courseItem = tableWidget->item(row, 2);
+        if (courseItem) {
+            QString course = courseItem->text();
+            courseCounts[course]++;
+            total++;
+        }
+    }
+
+    QList<QPair<QString, int>> courseData;
+    for (auto it = courseCounts.begin(); it != courseCounts.end(); ++it) {
+        courseData.append(qMakePair(it.key(), it.value()));
+    }
+
+    ChartWindow *chart = new ChartWindow(this);
+    chart->setData(courseData, selectedCourse);
+    chart->exec();
+}
+
