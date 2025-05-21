@@ -5,6 +5,10 @@
 ChartWindow::ChartWindow(QWidget *parent) : QDialog(parent) {
     setWindowTitle("Анализ лабораторных работ");
     resize(800, 600);
+
+    // Создаём layout явно
+    auto *layout = new QVBoxLayout(this);
+    this->setLayout(layout);  // ВАЖНО: привязать его к this
 }
 
 /*void ChartWindow::setData(const QList<QPair<QString, int>> &courseCounts, const QString &selectedCourse) {
@@ -55,6 +59,11 @@ ChartWindow::ChartWindow(QWidget *parent) : QDialog(parent) {
 } */
 
 void ChartWindow::setData(const QList<QPair<QString, int>> &data, const QString &selectedCourse) {
+    
+    if (!this->layout()) {
+        qWarning("ChartWindow has no layout!");
+        return;
+    }
     int total = 0;
     int selectedCount = 0;
 
