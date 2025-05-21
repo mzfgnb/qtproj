@@ -11,15 +11,19 @@
 #include <QMessageBox>
 #include <QLineEdit>
 #include <QDate>
+#include <QComboBox>
+#include <QLabel>
+#include "chartwindow.h"
 
 LabRecordsApp::LabRecordsApp(QWidget *parent) : QMainWindow(parent) {
+    
     // Главный виджет и горизонтальный layout
     auto *centralWidget = new QWidget(this);
     auto *mainLayout = new QHBoxLayout(centralWidget); // Основной горизонтальный layout
 
     // Создаем таблицу (будет слева)
     tableWidget = new QTableWidget(0, 7, this);
-    tableWidget->setHorizontalHeaderLabels({"Студент", "Номер группы", "Номер курса",
+    tableWidget->setHorizontalHeaderLabels({"Студент", "Номер группы", "Дисциплина",
                                             "Лаб. работа", "Срок сдачи", "Оценка", "Дата выдачи"});
 
     // Настраиваем растягивание таблицы
@@ -52,7 +56,7 @@ LabRecordsApp::LabRecordsApp(QWidget *parent) : QMainWindow(parent) {
     queriesMenu->addAction("Самое долгое выполнение", this, &LabRecordsApp::zaprosLongestLabToDo);
     
     queriesMenuButton->setMenu(queriesMenu);
-
+    
     // Устанавливаем фиксированный размер кнопок
     const QSize buttonSize(300, 40);
     addButton->setFixedSize(buttonSize);
@@ -83,6 +87,41 @@ LabRecordsApp::LabRecordsApp(QWidget *parent) : QMainWindow(parent) {
     mainLayout->addWidget(tableWidget, 1); // Таблица будет растягиваться
     mainLayout->addLayout(buttonsLayout);  // Кнопки справа
 
+    // Добавим нижнюю панель анализа по курсу
+    auto *analysisLayout = new QVBoxLayout();
+
+    // Заполняем список уникальных курсов из таблицы
+    QSet<QString> courseSet;
+    for (int row = 0; row < tableWidget->rowCount(); ++row) {
+        QTableWidgetItem *item = tableWidget->item(row, 2); // Колонка "Номер курса"
+        if (item) {
+            courseSet.insert(item->text());
+        }
+    }
+
+    courseComboBox = new QComboBox(this);
+    courseComboBox->addItem("Выберите курс");
+    for (const QString &course : courseSet) {
+        courseComboBox->addItem(course);
+    }
+
+    analyzeButton = new QPushButton("Показать диаграммы", this);
+    analyzeButton->setFixedSize(buttonSize);
+
+    buttonsLayout->addWidget(new QLabel("Анализ по курсу:"));
+    buttonsLayout->addWidget(courseComboBox);
+    buttonsLayout->addWidget(analyzeButton);
+
+    // Обработчик кнопки анализа
+    connect(analyzeButton, &QPushButton::clicked, this, [this]() {
+        QString selected = courseComboBox->currentText();
+        if (selected == "Выберите курс") {
+            QMessageBox::warning(this, "Ошибка", "Пожалуйста, выберите курс.");
+            return;
+        }
+        showChartsForCourse(selected);
+    });
+
     // Устанавливаем центральный виджет
     this->setCentralWidget(centralWidget);
 
@@ -109,6 +148,19 @@ void LabRecordsApp::addRecord() {
             tableWidget->setItem(row, col, new QTableWidgetItem(value));
         } else {
             tableWidget->setItem(row, col, new QTableWidgetItem(""));
+        }
+    }
+    // Обновляем список дисциплин в выпадающем списке
+    if (courseComboBox) {
+        QSet<QString> currentItems;
+        for (int i = 1; i < courseComboBox->count(); ++i) {
+            currentItems.insert(courseComboBox->itemText(i));
+        }
+
+        QString newSubject = tableWidget->item(tableWidget->rowCount() - 1, 2)->text(); // колонка "Дисциплина"
+
+        if (!currentItems.contains(newSubject)) {
+            courseComboBox->addItem(newSubject);
         }
     }
 }
@@ -190,6 +242,20 @@ void LabRecordsApp::loadFromFile() {
             }
         }
         file.close();
+        // Обновляем список курсов после загрузки
+        courseComboBox->clear();
+        courseComboBox->addItem("Выберите дисциплину");
+
+        QSet<QString> uniqueSubjects;
+        for (int row = 0; row < tableWidget->rowCount(); ++row) {
+            QTableWidgetItem *item = tableWidget->item(row, 2); // колонка "Дисциплина"
+            if (item) {
+                uniqueSubjects.insert(item->text());
+            }
+        }
+        for (const QString &subject : uniqueSubjects) {
+            courseComboBox->addItem(subject);
+        }
     } else {
         QMessageBox::warning(this, "Ошибка", "Ошибка при загрузке данных из файла");
     }
@@ -268,19 +334,18 @@ void LabRecordsApp::zaprosLabMoreTwoPerDay() {
 
 void LabRecordsApp::zaprosPoCourseWithGoodMark() {
     bool ok;
-    int course = QInputDialog::getInt(this, "Хорошие оценки по курсу",
-                                      "Введите номер курса:",
-                                      1, 1, 6, 1, &ok);
-    if (!ok) return;
+    QString subject = QInputDialog::getText(this, "Хорошие оценки по предмету",
+                                            "Введите название предмета:", QLineEdit::Normal, "", &ok);
+    if (!ok || subject.isEmpty()) return;
 
     for (int row = 0; row < tableWidget->rowCount(); ++row) {
-        QString courseStr = tableWidget->item(row, 2)->text(); // Колонка "Номер курса"
-        QString markStr = tableWidget->item(row, 5)->text();   // Колонка "Оценка"
+        QString subjectStr = tableWidget->item(row, 2)->text(); // дисциплина
+        QString markStr = tableWidget->item(row, 5)->text();     // оценка
 
         bool isInt;
         int mark = markStr.toInt(&isInt);
 
-        bool show = (courseStr == QString::number(course)) && isInt && mark >= 4;
+        bool show = (subjectStr.compare(subject, Qt::CaseInsensitive) == 0) && isInt && mark >= 4;
         tableWidget->setRowHidden(row, !show);
     }
 }
@@ -340,3 +405,27 @@ void LabRecordsApp::zaprosLongestLabToDo() {
                                  QString("Максимальное время выполнения: %1 дней").arg(maxDays));
     }
 }
+
+void LabRecordsApp::showChartsForCourse(const QString &selectedSubject) {
+    QMap<QString, int> courseCounts;
+    int total = 0;
+
+    for (int row = 0; row < tableWidget->rowCount(); ++row) {
+        QTableWidgetItem *courseItem = tableWidget->item(row, 2);
+        if (courseItem) {
+            QString course = courseItem->text();
+            courseCounts[course]++;
+            total++;
+        }
+    }
+
+    QList<QPair<QString, int>> courseData;
+    for (auto it = courseCounts.begin(); it != courseCounts.end(); ++it) {
+        courseData.append(qMakePair(it.key(), it.value()));
+    }
+
+    ChartWindow *chart = new ChartWindow(this);
+    chart->setData(courseData, selectedSubject);
+    chart->exec();
+}
+
