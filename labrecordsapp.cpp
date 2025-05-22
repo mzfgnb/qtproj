@@ -32,6 +32,7 @@ LabRecordsApp::LabRecordsApp(QWidget *parent) : QMainWindow(parent) {
 
     // Настраиваем растягивание таблицы
     tableWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    filteredTable->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     for (int col = 0; col < tableWidget->columnCount(); ++col) {
         tableWidget->setColumnWidth(col, 200);
     }
@@ -131,6 +132,7 @@ LabRecordsApp::LabRecordsApp(QWidget *parent) : QMainWindow(parent) {
 
     // Устанавливаем центральный виджет
     this->setCentralWidget(centralWidget);
+    this->setMinimumSize(900, 600);
 
     // Подключаем сигналы кнопок
     connect(addButton, &QPushButton::clicked, this, &LabRecordsApp::addRecord);
