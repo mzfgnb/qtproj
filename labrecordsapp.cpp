@@ -45,6 +45,7 @@ LabRecordsApp::LabRecordsApp(QWidget *parent) : QMainWindow(parent) {
     QPushButton *loadButton = new QPushButton("Загрузить из файла");
     QPushButton *showUmlButton = new QPushButton("Показать UML");
     QPushButton *resetButton = new QPushButton("Сбросить фильтр");
+    QPushButton *filterButton = new QPushButton("Фильтрация");
     QPushButton *queriesMenuButton = new QPushButton("Запросы");
     QMenu *queriesMenu = new QMenu(this);
     
@@ -66,6 +67,7 @@ LabRecordsApp::LabRecordsApp(QWidget *parent) : QMainWindow(parent) {
     saveButton->setFixedSize(buttonSize);
     loadButton->setFixedSize(buttonSize);
     resetButton->setFixedSize(buttonSize);
+    filterButton->setFixedSize(buttonSize);
     queriesMenuButton->setFixedSize(buttonSize);
     showUmlButton->setFixedSize(buttonSize);
 
@@ -78,6 +80,7 @@ LabRecordsApp::LabRecordsApp(QWidget *parent) : QMainWindow(parent) {
     buttonsLayout->addWidget(saveButton);
     buttonsLayout->addWidget(loadButton);
     buttonsLayout->addWidget(resetButton);
+    buttonsLayout->addWidget(filterButton);
     buttonsLayout->addWidget(queriesMenuButton);
     buttonsLayout->addWidget(showUmlButton);
     buttonsLayout->addStretch(); // Добавляем растягивающийся элемент внизу
@@ -133,6 +136,7 @@ LabRecordsApp::LabRecordsApp(QWidget *parent) : QMainWindow(parent) {
     connect(saveButton, &QPushButton::clicked, this, &LabRecordsApp::saveToFile);
     connect(loadButton, &QPushButton::clicked, this, &LabRecordsApp::loadFromFile);
     connect(resetButton, &QPushButton::clicked, this, &LabRecordsApp::resetFilters);
+    connect(filterButton, &QPushButton::clicked, this, &LabRecordsApp::filterRecords);
     connect(showUmlButton, &QPushButton::clicked, this, &LabRecordsApp::showUMLDiagram);
 }
 
@@ -207,7 +211,12 @@ void LabRecordsApp::deleteRecord() {
 }
 
 void LabRecordsApp::saveToFile() {
-    QFile file("records.txt");
+    QString filename = QFileDialog::getSaveFileName(this, "Экспорт данных","Введите название файла с указанитем типа файла");
+    if (filename.isEmpty()) {
+        return;
+    }
+
+    QFile file(filename);
     if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QTextStream out(&file);
         for (int row = 0; row < tableWidget->rowCount(); ++row) {
@@ -227,7 +236,12 @@ void LabRecordsApp::saveToFile() {
 }
 
 void LabRecordsApp::loadFromFile() {
-    QFile file("records.txt");
+    QString FileName = QFileDialog::getOpenFileName(this, "Выберите файл", "", "Текстовые файлы (*.txt);;Все файлы (*)");
+    if (FileName.isEmpty()) {
+        return;
+    }
+
+    QFile file(FileName);
     if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         QTextStream in(&file);
         tableWidget->setRowCount(0);
@@ -429,3 +443,80 @@ void LabRecordsApp::showChartsForCourse(const QString &selectedSubject) {
     chart->exec();
 }
 
+void MainWindow::filterRecords()
+{
+    if (ui->tableWidget->isHidden()) {
+        ui->tableWidget->setVisible(true);
+
+        QLayoutItem* item;
+        while ((item = ui->verticalLayout_2->takeAt(1)) != nullptr) {
+            delete item->widget();
+            delete item;
+        }
+        return;
+    }
+
+    if (recordcount == 0) {
+        QMessageBox::warning(this, "Ошибка", "Нет записей для фильтрации!");
+        return;
+    }
+
+    QString studentName = QInputDialog::getText(this, "Фильтрация по студенту",
+                                              "Введите фамилию студента:",
+                                              QLineEdit::Normal);
+
+    if (studentName.isEmpty()) {
+        QMessageBox::warning(this, "Ошибка", "Не введено имя студента!");
+        return;
+    }
+
+    QTableWidget *filteredTable = new QTableWidget(this);
+    filteredTable->setColumnCount(ui->tableWidget->columnCount());
+    filteredTable->setHorizontalHeaderLabels({"Студент", "Номер группы", "Дисциплина", "Лаб. работа", "Срок сдачи", "Оценка", "Дата выдачи"});
+
+    int filteredRow = 0;
+    bool found = false;
+
+    for (int row = 0; row < ui->tableWidget->rowCount(); ++row) {
+        QTableWidgetItem *item = ui->tableWidget->item(row, 0);
+
+        if (item && item->text().contains(studentName, Qt::CaseInsensitive)) {
+            found = true;
+            filteredTable->insertRow(filteredRow);
+
+            for (int col = 0; col < ui->tableWidget->columnCount(); ++col) {
+                QTableWidgetItem *originalItem = ui->tableWidget->item(row, col);
+                if (originalItem) {
+                    QTableWidgetItem *newItem = originalItem->clone();
+                    filteredTable->setItem(filteredRow, col, newItem);
+                }
+            }
+            filteredRow++;
+        }
+    }
+
+    if (!found) {
+        QMessageBox::information(this, "Результат",
+                                QString("Не найдено записей для студента: %1").arg(studentName));
+        delete filteredTable;
+        return;
+    }
+
+    filteredTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    filteredTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    filteredTable->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+    QLayoutItem* item;
+    while ((item = ui->verticalLayout_2->takeAt(1)) != nullptr) {
+        delete item->widget();
+        delete item;
+    }
+
+    ui->verticalLayout_2->insertWidget(1, filteredTable);
+    ui->tableWidget->setVisible(false);
+    filteredTable->setWindowTitle(QString("Записи студента: %1").arg(studentName));
+
+    if (chartView && chartView->isVisible()) {
+        chartView->setVisible(false);
+    }
+}
