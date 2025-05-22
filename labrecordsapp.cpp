@@ -14,6 +14,10 @@
 #include <QComboBox>
 #include <QLabel>
 #include "chartwindow.h"
+#include <QFileDialog>
+#include <QHeaderView>
+
+
 
 LabRecordsApp::LabRecordsApp(QWidget *parent) : QMainWindow(parent) {
     
@@ -444,57 +448,61 @@ void LabRecordsApp::showChartsForCourse(const QString &selectedSubject) {
 }
 
 void LabRecordsApp::filterRecords() {
-    if (!tableWidget) return;
-
-    if (tableWidget->isHidden()) {
+    // Если таблица уже скрыта — показать обратно (сброс фильтрации)
+    if (!tableWidget->isVisible()) {
         tableWidget->setVisible(true);
+        if (filteredTable) {
+            layout()->removeWidget(filteredTable);
+            delete filteredTable;
+            filteredTable = nullptr;
+        }
         return;
     }
 
     if (tableWidget->rowCount() == 0) {
-        QMessageBox::warning(this, "Ошибка", "Нет записей для фильтрации!");
+        QMessageBox::warning(this, "Ошибка", "Нет записей для фильтрации.");
         return;
     }
 
-    QString studentName = QInputDialog::getText(this, "Фильтрация по студенту",
-                                                "Введите фамилию студента:",
-                                                QLineEdit::Normal);
-
-    if (studentName.isEmpty()) {
-        QMessageBox::warning(this, "Ошибка", "Не введено имя студента!");
+    // Запрос фамилии студента
+    bool ok;
+    QString surname = QInputDialog::getText(this, "Фильтрация",
+                                            "Введите фамилию студента:",
+                                            QLineEdit::Normal, "", &ok);
+    if (!ok || surname.trimmed().isEmpty()) {
         return;
     }
 
-    QTableWidget *filteredTable = new QTableWidget(this);
+    // Создаём таблицу для фильтрованных записей
+    filteredTable = new QTableWidget(this);
     filteredTable->setColumnCount(tableWidget->columnCount());
-    filteredTable->setHorizontalHeaderLabels(
-        {"Студент", "Номер группы", "Дисциплина", "Лаб. работа",
-         "Срок сдачи", "Оценка", "Дата выдачи"});
+    filteredTable->setHorizontalHeaderLabels({
+        "Студент", "Номер группы", "Дисциплина",
+        "Лаб. работа", "Срок сдачи", "Оценка", "Дата выдачи"
+    });
 
-    int filteredRow = 0;
+    int rowIndex = 0;
     bool found = false;
 
     for (int row = 0; row < tableWidget->rowCount(); ++row) {
-        QTableWidgetItem *item = tableWidget->item(row, 0);
-
-        if (item && item->text().contains(studentName, Qt::CaseInsensitive)) {
-            found = true;
-            filteredTable->insertRow(filteredRow);
-
+        QTableWidgetItem *item = tableWidget->item(row, 0); // Фамилия
+        if (item && item->text().contains(surname, Qt::CaseInsensitive)) {
+            filteredTable->insertRow(rowIndex);
             for (int col = 0; col < tableWidget->columnCount(); ++col) {
-                QTableWidgetItem *originalItem = tableWidget->item(row, col);
-                if (originalItem) {
-                    filteredTable->setItem(filteredRow, col, new QTableWidgetItem(*originalItem));
+                QTableWidgetItem *origItem = tableWidget->item(row, col);
+                if (origItem) {
+                    filteredTable->setItem(rowIndex, col, new QTableWidgetItem(origItem->text()));
                 }
             }
-            filteredRow++;
+            ++rowIndex;
+            found = true;
         }
     }
 
     if (!found) {
-        QMessageBox::information(this, "Результат",
-                                 QString("Не найдено записей для студента: %1").arg(studentName));
+        QMessageBox::information(this, "Результат", "Совпадений не найдено.");
         delete filteredTable;
+        filteredTable = nullptr;
         return;
     }
 
@@ -502,9 +510,7 @@ void LabRecordsApp::filterRecords() {
     filteredTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
     filteredTable->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-    // Заменим текущую таблицу новой
-    layout()->removeWidget(tableWidget);
-    tableWidget->setVisible(false);
     layout()->addWidget(filteredTable);
-
+    tableWidget->setVisible(false);
 }
+
