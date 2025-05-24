@@ -7,6 +7,7 @@
 #include <QComboBox>
 #include <QLabel>
 #include <QPushButton>
+#include <QHBoxLayout>
 
 class LabRecordsApp : public QMainWindow {
     Q_OBJECT
