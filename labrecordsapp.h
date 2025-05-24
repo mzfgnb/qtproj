@@ -36,7 +36,8 @@ private:
     QLineEdit *filterLineEdit;
     QComboBox *courseComboBox;
     QPushButton *analyzeButton;
-    QTableWidget *filteredTable = nullptr;
+    QTableWidget *filteredTable = nullptr;    
+    QHBoxLayout *mainLayout = nullptr;
     void showChartsForCourse(const QString &subjectName);
 };
 

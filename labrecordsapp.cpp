@@ -23,7 +23,7 @@ LabRecordsApp::LabRecordsApp(QWidget *parent) : QMainWindow(parent) {
     
     // Главный виджет и горизонтальный layout
     auto *centralWidget = new QWidget(this);
-    auto *mainLayout = new QHBoxLayout(centralWidget); // Основной горизонтальный layout
+    mainLayout = new QHBoxLayout(centralWidget); // Основной горизонтальный layout
 
     // Создаем таблицу (будет слева)
     tableWidget = new QTableWidget(0, 7, this);
@@ -32,7 +32,6 @@ LabRecordsApp::LabRecordsApp(QWidget *parent) : QMainWindow(parent) {
 
     // Настраиваем растягивание таблицы
     tableWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    filteredTable->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     for (int col = 0; col < tableWidget->columnCount(); ++col) {
         tableWidget->setColumnWidth(col, 200);
     }
@@ -50,7 +49,7 @@ LabRecordsApp::LabRecordsApp(QWidget *parent) : QMainWindow(parent) {
     QPushButton *loadButton = new QPushButton("Загрузить из файла");
     QPushButton *showUmlButton = new QPushButton("Показать UML");
     QPushButton *resetButton = new QPushButton("Сбросить фильтр");
-    QPushButton *filterButton = new QPushButton("Фильтрация");
+    QPushButton *filterButton = new QPushButton("Фильтрация по студенту");
     QPushButton *queriesMenuButton = new QPushButton("Запросы");
     QMenu *queriesMenu = new QMenu(this);
     
@@ -450,11 +449,10 @@ void LabRecordsApp::showChartsForCourse(const QString &selectedSubject) {
 }
 
 void LabRecordsApp::filterRecords() {
-    // Если таблица уже скрыта — показать обратно (сброс фильтрации)
     if (!tableWidget->isVisible()) {
         tableWidget->setVisible(true);
         if (filteredTable) {
-            layout()->removeWidget(filteredTable);
+            mainLayout->removeWidget(filteredTable);
             delete filteredTable;
             filteredTable = nullptr;
         }
@@ -466,16 +464,12 @@ void LabRecordsApp::filterRecords() {
         return;
     }
 
-    // Запрос фамилии студента
     bool ok;
     QString surname = QInputDialog::getText(this, "Фильтрация",
                                             "Введите фамилию студента:",
                                             QLineEdit::Normal, "", &ok);
-    if (!ok || surname.trimmed().isEmpty()) {
-        return;
-    }
+    if (!ok || surname.trimmed().isEmpty()) return;
 
-    // Создаём таблицу для фильтрованных записей
     filteredTable = new QTableWidget(this);
     filteredTable->setColumnCount(tableWidget->columnCount());
     filteredTable->setHorizontalHeaderLabels({
@@ -487,7 +481,7 @@ void LabRecordsApp::filterRecords() {
     bool found = false;
 
     for (int row = 0; row < tableWidget->rowCount(); ++row) {
-        QTableWidgetItem *item = tableWidget->item(row, 0); // Фамилия
+        QTableWidgetItem *item = tableWidget->item(row, 0);
         if (item && item->text().contains(surname, Qt::CaseInsensitive)) {
             filteredTable->insertRow(rowIndex);
             for (int col = 0; col < tableWidget->columnCount(); ++col) {
@@ -512,7 +506,6 @@ void LabRecordsApp::filterRecords() {
     filteredTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
     filteredTable->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-    layout()->addWidget(filteredTable);
+    mainLayout->addWidget(filteredTable);
     tableWidget->setVisible(false);
 }
-
