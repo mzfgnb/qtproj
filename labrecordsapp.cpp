@@ -49,7 +49,7 @@ LabRecordsApp::LabRecordsApp(QWidget *parent) : QMainWindow(parent) {
     QPushButton *loadButton = new QPushButton("Загрузить из файла");
     QPushButton *showUmlButton = new QPushButton("Показать UML");
     QPushButton *resetButton = new QPushButton("Сбросить фильтр");
-    QPushButton *filterButton = new QPushButton("Фильтрация по студенту");
+    QPushButton *filterButton = new QPushButton("Фильтрация по записи");
     QPushButton *queriesMenuButton = new QPushButton("Запросы");
     QMenu *queriesMenu = new QMenu(this);
     
