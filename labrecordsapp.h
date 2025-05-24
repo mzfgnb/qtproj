@@ -7,6 +7,7 @@
 #include <QComboBox>
 #include <QLabel>
 #include <QPushButton>
+#include <QHBoxLayout>
 
 class LabRecordsApp : public QMainWindow {
     Q_OBJECT
@@ -22,6 +23,7 @@ private slots:
     void saveToFile();
     void loadFromFile();
     void resetFilters();
+    void filterRecords();
     void showUMLDiagram();
     void zaprosLabPoSurname();
     void zaprosLabPoGroup();
@@ -35,6 +37,8 @@ private:
     QLineEdit *filterLineEdit;
     QComboBox *courseComboBox;
     QPushButton *analyzeButton;
+    QTableWidget *filteredTable = nullptr;    
+    QHBoxLayout *mainLayout = nullptr;
     void showChartsForCourse(const QString &subjectName);
 };
 
