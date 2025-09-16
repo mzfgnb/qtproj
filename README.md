@@ -1,5 +1,5 @@
 
-# To compile project and run the instruction
+# To compile project and run
 
 ### For Qt6:
 
